@@ -22,6 +22,9 @@ namespace DLS.Game
 				CreateInputOrOutputPin(ChipType.In_8Bit),
 				CreateInputOrOutputPin(ChipType.Out_8Bit),
 				CreateInputKeyChip(),
+				CreateInputButtonChip(),
+				CreateInputToggleChip(),
+				
 				// ---- Basic Chips ----
 				CreateNand(),
 				CreateTristateBuffer(),
@@ -30,6 +33,8 @@ namespace DLS.Game
 				// ---- Memory ----
 				dev_CreateRAM_8(),
 				CreateROM_8(),
+				CreateEEPROM_8(),
+
 				// ---- Merge / Split ----
 				CreateBitConversionChip(ChipType.Split_4To1Bit, PinBitCount.Bit4, PinBitCount.Bit1, 1, 4),
 				CreateBitConversionChip(ChipType.Split_8To4Bit, PinBitCount.Bit8, PinBitCount.Bit4, 1, 2),
@@ -118,7 +123,29 @@ namespace DLS.Game
 			return CreateBuiltinChipDescription(ChipType.Rom_256x16, size, col, inputPins, outputPins);
 		}
 
-		static ChipDescription CreateInputKeyChip()
+        static ChipDescription CreateEEPROM_8()
+        {
+            PinDescription[] inputPins =
+            {
+                CreatePinDescription("ADDRESS", 0, PinBitCount.Bit8),
+				CreatePinDescription("WRITE B", 1, PinBitCount.Bit8),
+                CreatePinDescription("WRITE A", 2, PinBitCount.Bit8),
+                CreatePinDescription("WRITE", 3, PinBitCount.Bit1),
+				CreatePinDescription("CLOCK", 4, PinBitCount.Bit1)
+            };
+            PinDescription[] outputPins =
+            {
+                CreatePinDescription("OUT B", 5, PinBitCount.Bit8),
+                CreatePinDescription("OUT A", 6, PinBitCount.Bit8)
+            };
+
+            Color col = new(0.25f, 0.35f, 0.5f);
+            Vector2 size = new(GridSize * 12, SubChipInstance.MinChipHeightForPins(inputPins, outputPins));
+
+            return CreateBuiltinChipDescription(ChipType.EEPROM_256x16, size, col, inputPins, outputPins);
+        }
+
+        static ChipDescription CreateInputKeyChip()
 		{
 			Color col = new(0.1f, 0.1f, 0.1f);
 			Vector2 size = new Vector2(GridSize, GridSize) * 3;
@@ -128,8 +155,48 @@ namespace DLS.Game
 			return CreateBuiltinChipDescription(ChipType.Key, size, col, null, outputPins, null, NameDisplayLocation.Hidden);
 		}
 
+        static ChipDescription CreateInputButtonChip()
+        {
+            Color col = new(0.1f, 0.1f, 0.1f);
+            Vector2 size = new Vector2(GridSize, GridSize) * 3;
+			float displayWidth = size.x - GridSize *0.5f;
 
-		static ChipDescription CreateTristateBuffer()
+            PinDescription[] outputPins = { CreatePinDescription("OUT", 0) };
+			DisplayDescription[] displays =
+			{
+				new()
+				{
+					Position = Vector2.zero,
+					Scale = displayWidth,
+					SubChipID = -1
+				}
+			};
+
+            return CreateBuiltinChipDescription(ChipType.Button, size, col, null, outputPins, displays, NameDisplayLocation.Hidden);
+        }
+
+        static ChipDescription CreateInputToggleChip()
+        {
+            Color col = new(70, 130, 180);
+            Vector2 size = new Vector2(1f, 2f) * GridSize;
+            float displayWidth = size.x;
+
+            PinDescription[] outputPins = { CreatePinDescription("OUT", 0) };
+            DisplayDescription[] displays =
+            {
+                new()
+                {
+                    Position = Vector2.zero,
+                    Scale = displayWidth,
+                    SubChipID = -1
+                }
+            };
+
+            return CreateBuiltinChipDescription(ChipType.Toggle, size, col, null, outputPins, displays, NameDisplayLocation.Hidden);
+        }
+
+
+        static ChipDescription CreateTristateBuffer()
 		{
 			Color col = new(0.1f, 0.1f, 0.1f);
 			Vector2 size = new(CalculateGridSnappedWidth(1.5f), GridSize * 5);

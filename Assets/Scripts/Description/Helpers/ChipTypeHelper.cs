@@ -17,6 +17,7 @@ namespace DLS.Description
 			// ---- Memory ----
 			{ ChipType.dev_Ram_8Bit, "dev.RAM-8" },
 			{ ChipType.Rom_256x16, $"ROM 256{mulSymbol}16" },
+            { ChipType.EEPROM_256x16, $"EEPROM 256{mulSymbol}16" },
 			// ---- Split / Merge ----
 			{ ChipType.Split_4To1Bit, "4-1BIT" },
 			{ ChipType.Split_8To1Bit, "8-1BIT" },
@@ -43,6 +44,9 @@ namespace DLS.Description
 			{ ChipType.Out_4Bit, "OUT-4" },
 			{ ChipType.Out_8Bit, "OUT-8" },
 			{ ChipType.Key, "KEY" },
+            { ChipType.Button, "BUTTON" },
+			{ ChipType.Toggle, "DIPSWITCH" },
+
 			// ---- Buses ----
 			{ ChipType.Bus_1Bit, "BUS-1" },
 			{ ChipType.Bus_4Bit, "BUS-4" },
@@ -60,7 +64,7 @@ namespace DLS.Description
 
 		public static bool IsBusTerminusType(ChipType type) => type is ChipType.BusTerminus_1Bit or ChipType.BusTerminus_4Bit or ChipType.BusTerminus_8Bit;
 
-		public static bool IsRomType(ChipType type) => type == ChipType.Rom_256x16;
+		public static bool IsRomType(ChipType type) => type == ChipType.Rom_256x16 || type == ChipType.EEPROM_256x16;
 
 		public static ChipType GetCorrespondingBusTerminusType(ChipType type)
 		{
@@ -107,6 +111,16 @@ namespace DLS.Description
 				ChipType.Out_8Bit => (false, true, PinBitCount.Bit8),
 				_ => (false, false, PinBitCount.Bit1)
 			};
+		}
+
+		public static bool IsClickableDisplayType(ChipType type) {
+			// Return true for any chiptype that is a clickable display 
+
+			return type == ChipType.Button || type == ChipType.Toggle;
+		}
+
+		public static bool IsInternalDataModifiable(ChipType type) {
+			return type == ChipType.EEPROM_256x16 || type == ChipType.Toggle;
 		}
 	}
 }
