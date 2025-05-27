@@ -123,7 +123,7 @@ namespace DLS.Game
 			if (Project.ActiveProject.ShouldRouteWires)
 			{
 				// If routing wires, we need to reroute the second last point to account for the end pin snapping to the grid or chip pin
-				Vector2[] points = GridHelper.RouteWire(GetWirePoint(WirePoints.Count - 3), endPin.GetWorldPos());
+				Vector2[] points = GridHelper.RouteWire(GetWirePoint(WirePoints.Count - 3), endPin.GetWorldPos(), Project.ActiveProject.WireRoutingMode);
 				SetWirePoint(points[0], WirePoints.Count - 2);
 
 			}
@@ -222,7 +222,7 @@ namespace DLS.Game
 			if (Project.ActiveProject.ForceStraightWires && Project.ActiveProject.ShouldRouteWires && WirePoints.Count > 2 && !IsFullyConnected)
 			{
 				// If routing wires, we need to route the wire to the new point
-				Vector2[] points = GridHelper.RouteWire(GetWirePoint(WirePoints.Count - 3), p);
+				Vector2[] points = GridHelper.RouteWire(GetWirePoint(WirePoints.Count - 3), p, Project.ActiveProject.WireRoutingMode);
 				p = points[1];
 				SetWirePoint(points[0], WirePoints.Count - 2);
 

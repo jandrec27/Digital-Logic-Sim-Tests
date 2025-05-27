@@ -48,7 +48,8 @@ namespace DLS.Graphics
 		static readonly string[] WireRoutingOptions =
 		{
 			"Off",
-			"45°"
+			"45°",
+			"90°",
 		};
 
 		static readonly string[] SimulationStatusOptions =
