@@ -22,6 +22,7 @@ namespace DLS.Description
 		public int Prefs_SimTargetStepsPerSecond;
 		public int Prefs_SimStepsPerClockTick;
 		public int Prefs_WireRouting;
+		public int Prefs_WireStyle;
 
 
 

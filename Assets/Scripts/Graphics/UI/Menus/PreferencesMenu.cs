@@ -52,6 +52,12 @@ namespace DLS.Graphics
 			"90°",
 		};
 
+		static readonly string[] WireStyleOptions =
+		{
+			"Straight",
+			"Curved"
+		};
+
 		static readonly string[] SimulationStatusOptions =
 		{
 			"Active",
@@ -68,6 +74,7 @@ namespace DLS.Graphics
 		static readonly UIHandle ID_Snapping = new("PREFS_Snapping");
 		static readonly UIHandle ID_StraightWires = new("PREFS_StraightWires");
 		static readonly UIHandle ID_WireRouting = new("PREFS_WireRouting");
+		static readonly UIHandle ID_WireStyle = new("PREFS_WireStyle");
 		static readonly UIHandle ID_SimStatus = new("PREFS_SimStatus");
 		static readonly UIHandle ID_SimFrequencyField = new("PREFS_SimTickTarget");
 		static readonly UIHandle ID_ClockSpeedInput = new("PREFS_ClockSpeed");
@@ -107,6 +114,7 @@ namespace DLS.Graphics
 				int mainPinNamesMode = DrawNextWheel("Show I/O pin names", PinDisplayOptions, ID_MainPinNames);
 				int chipPinNamesMode = DrawNextWheel("Show chip pin names", PinDisplayOptions, ID_ChipPinNames);
 				int gridDisplayMode = DrawNextWheel(showGridLabel, GridDisplayOptions, ID_GridDisplay);
+				int wireStyleMode = DrawNextWheel("Wire style", WireStyleOptions, ID_WireStyle);
 				DrawHeader("EDITING:");
 				int snappingMode = DrawNextWheel("Snap to grid", SnappingOptions, ID_Snapping);
 				int straightWireMode = DrawNextWheel("Straight wires", StraightWireOptions, ID_StraightWires);
@@ -147,6 +155,7 @@ namespace DLS.Graphics
 				project.description.Prefs_Snapping = snappingMode;
 				project.description.Prefs_WireRouting = wireRoutingMode;
 				project.description.Prefs_StraightWires = straightWireMode;
+				project.description.Prefs_WireStyle = wireStyleMode;
 				project.description.Prefs_SimTargetStepsPerSecond = targetSimTicksPerSecond;
 				project.description.Prefs_SimStepsPerClockTick = clockSpeed;
 				project.description.Prefs_SimPaused = pauseSim;
@@ -217,6 +226,7 @@ namespace DLS.Graphics
 			UI.GetWheelSelectorState(ID_Snapping).index = projDesc.Prefs_Snapping;
 			UI.GetWheelSelectorState(ID_StraightWires).index = projDesc.Prefs_StraightWires;
 			UI.GetWheelSelectorState(ID_WireRouting).index = projDesc.Prefs_WireRouting;
+			UI.GetWheelSelectorState(ID_WireStyle).index = projDesc.Prefs_WireStyle;
 			UI.GetWheelSelectorState(ID_SimStatus).index = projDesc.Prefs_SimPaused ? 1 : 0;
 			// -- Input fields
 			UI.GetInputFieldState(ID_SimFrequencyField).SetText(projDesc.Prefs_SimTargetStepsPerSecond + "", false);

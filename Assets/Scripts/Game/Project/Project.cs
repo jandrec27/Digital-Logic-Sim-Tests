@@ -490,7 +490,12 @@ namespace DLS.Game
 			_ => 0 // Default to no routing
 		};
 
-
+		public int WireStyle => description.Prefs_WireStyle switch
+		{
+			0 => 0, // Stright wires
+			1 => 1, // Curved wires
+			_ => 0 // Default to normal wires
+		};
 
 		public void NotifyExit()
 		{

@@ -749,7 +749,7 @@ namespace DLS.Graphics
 
 			// Draw
 			Color col = wire.GetColour(0);
-			float interactSqrDst = WireDrawer.DrawWireStraight(wire.BitWires[0].Points, thickness, col, mousePos);
+			float interactSqrDst = WireDrawer.DrawWire(wire.BitWires[0].Points, thickness, col, mousePos);
 
 			// Draw connection point (if connects to wire)
 			if (wire.ConnectedWire != null)
@@ -782,7 +782,7 @@ namespace DLS.Graphics
 			{
 				WireInstance.BitWire bitWire = wire.BitWires[bitIndex];
 				Color col = wire.GetColour(bitIndex);
-				float sqrInteractDst = WireDrawer.DrawWireStraight(bitWire.Points, thickness, col, mousePos);
+				float sqrInteractDst = WireDrawer.DrawWire(bitWire.Points, thickness, col, mousePos);
 				if (canInteract && sqrInteractDst < sqrDstThreshold) InteractionState.NotifyElementUnderMouse(wire);
 			}
 		}

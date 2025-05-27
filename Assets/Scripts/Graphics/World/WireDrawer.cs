@@ -1,3 +1,4 @@
+using DLS.Game;
 using Seb.Helpers;
 using Seb.Vis;
 using UnityEngine;
@@ -5,7 +6,20 @@ using UnityEngine;
 namespace DLS.Graphics
 {
 	public static class WireDrawer
-	{
+	{	
+
+		public static float DrawWire(Vector2[] points, float thickness, Color col, Vector2 interactPos)
+		{
+			if (Project.ActiveProject.WireStyle == 0) // 0 = straight, 1 = curved
+			{
+				return DrawWireStraight(points, thickness, col, interactPos);
+			}
+			else
+			{
+				return DrawWireCurved(points, thickness, col, interactPos);
+			}
+		}
+
 		public static float DrawWireStraight(Vector2[] points, float thickness, Color col, Vector2 interactPos)
 		{
 			float interactSqrDst = float.MaxValue;
