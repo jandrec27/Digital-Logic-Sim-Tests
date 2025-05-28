@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 using static DLS.Graphics.DrawSettings;
 
 namespace DLS.Game
@@ -53,41 +54,15 @@ namespace DLS.Game
 			return prev + offset;
 		}
 
-		public static Vector2[] RouteWire(Vector2 prev, Vector2 curr)
-		{
-			Vector2[] points = new Vector2[2];
-			Vector2 offset = curr - prev;
-
-
-			if (Mathf.Abs(offset.x) > Mathf.Abs(offset.y))
-			{
-
-				// Horizontal mode: move horizontally, then 45-degree diagonal to curr
-				float diagLen = Mathf.Min(Mathf.Abs(offset.x), Mathf.Abs(offset.y));
-				float signX = Mathf.Sign(offset.x);
-				Vector2 bend = new Vector2(curr.x - diagLen * signX, prev.y);
-				points[0] = bend;
-				points[1] = curr;
-			}
-			else
-			{
-				// Vertical mode: move vertically, then 45-degree diagonal to curr
-				float diagLen = Mathf.Min(Mathf.Abs(offset.x), Mathf.Abs(offset.y));
-				float signY = Mathf.Sign(offset.y);
-				Vector2 bend = new Vector2(prev.x, curr.y - diagLen * signY);
-				points[0] = bend;
-				points[1] = curr;
-			}
-			return points;
-		}
 
 		public static Vector2[] RouteWire(Vector2 prev, Vector2 curr, int mode)
 		{
 			Vector2[] points = new Vector2[2];
 			Vector2 offset = curr - prev;
 
+
 			if (mode == 1)
-			{ 
+			{
 				if (Mathf.Abs(offset.x) > Mathf.Abs(offset.y))
 				{
 
@@ -99,15 +74,16 @@ namespace DLS.Game
 					points[1] = curr;
 				}
 				else
-			{
-				// Vertical mode: move vertically, then 45-degree diagonal to curr
-				float diagLen = Mathf.Min(Mathf.Abs(offset.x), Mathf.Abs(offset.y));
-				float signY = Mathf.Sign(offset.y);
-				Vector2 bend = new Vector2(prev.x, curr.y - diagLen * signY);
-				points[0] = bend;
-				points[1] = curr;
+				{
+					// Vertical mode: move vertically, then 45-degree diagonal to curr
+					float diagLen = Mathf.Min(Mathf.Abs(offset.x), Mathf.Abs(offset.y));
+					float signY = Mathf.Sign(offset.y);
+					Vector2 bend = new Vector2(prev.x, curr.y - diagLen * signY);
+					points[0] = bend;
+					points[1] = curr;
+				}
 			}
-			} else if (mode == 2)
+			else if (mode == 2)
 			{
 				if (Mathf.Abs(offset.x) > Mathf.Abs(offset.y))
 				{
@@ -126,6 +102,115 @@ namespace DLS.Game
 			}
 
 			return points;
+		}
+
+		public static Vector2[] RouteWire(Vector2 prev, Vector2 curr, int mode, float length)
+		{
+			Vector2[] points = new Vector2[4];
+			Vector2 offset = curr - prev;
+			float endLength = Project.ActiveProject.WireTerminationLength; 
+			
+			if (mode == 1)
+			{
+				if (Mathf.Abs(offset.x) > Mathf.Abs(offset.y))
+				{
+					// Horizontal mode: move horizontally, then 45-degree diagonal to bend2 then horizontally to curr
+					float signX = MathF.Sign(offset.x);
+					Vector2 bend0 = new(prev.x + endLength * signX, prev.y);
+					Vector2 bend2 = new(curr.x - endLength * signX, curr.y);
+
+					float diagLen = Mathf.Abs(offset.y);
+
+					Vector2 bend1 = new(bend2.x - diagLen * signX, prev.y);
+					/*points[0] = bend0;
+					points[1] = bend1;
+					points[2] = bend2;
+					points[3] = curr;*/
+
+					points[0] = bend1;
+					points[1] = bend2;
+					points[2] = curr;
+				}
+				else
+				{
+					// Vertical mode: move vertically, then 45-degree diagonal to bend2 then vertically to curr
+					float signY = Mathf.Sign(offset.y);
+					Vector2 bend0 = new(prev.x, prev.y + endLength * signY);
+					Vector2 bend2 = new(curr.x, curr.y - endLength * signY);
+
+					float diagLen = Mathf.Abs(offset.x);
+
+					Vector2 bend1 = new(prev.x, bend2.y - diagLen * signY);
+					/*points[0] = bend0;
+					points[1] = bend1;
+					points[2] = bend2;
+					points[3] = curr;*/
+					points[0] = bend1;
+					points[1] = bend2;
+					points[2] = curr;
+				}
+			}
+			else if (mode == 2)
+			{
+				if (Mathf.Abs(offset.x) > Mathf.Abs(offset.y))
+				{
+					float signX = Mathf.Sign(offset.x);
+					Vector2 bend0 = new(prev.x + endLength * signX, prev.y);
+					Vector2 bend2 = new(curr.x - endLength * signX, curr.y);
+					// Horizontal mode: move horizontally, then vertically to curr
+					Vector2 bend1 = new(bend2.x, prev.y);
+					/*points[0] = bend0;
+					points[1] = bend1;
+					points[2] = bend2;
+					points[3] = curr;*/
+					points[0] = bend1;
+					points[1] = bend2;
+					points[2] = curr;
+				}
+				else
+				{
+					float signY = Mathf.Sign(offset.y);
+					Vector2 bend0 = new(prev.x, prev.y + endLength * signY);
+					Vector2 bend2 = new(curr.x, curr.y - endLength * signY);
+					// Vertical mode: move vertically, then horizontally to curr
+					Vector2 bend1 = new(prev.x, bend2.y);
+					/*points[0] = bend0;
+					points[1] = bend1;
+					points[2] = bend2;
+					points[3] = curr;*/
+					points[0] = bend1;
+					points[1] = bend2;
+					points[2] = curr;
+				}
+			}
+
+			return points;
+		}
+
+		public static Vector2[] RouteWire(Vector2 prev, Vector2 curr, int mode, ChipInteractionController.RotationTarget r)
+		{
+			return null; // Placeholder for future implementation
+
+			if (mode == 1)
+			{
+				//Mode 1: 45-degree bend
+				if (r == ChipInteractionController.RotationTarget.Left || r == ChipInteractionController.RotationTarget.Right)
+				{
+					//Wire must end on a horizontal line
+					Vector2[] points = new Vector2[2];
+					Vector2 offset = curr - prev;
+
+					if (Mathf.Abs(offset.x) > Mathf.Abs(offset.y))
+					{
+
+					}
+				}
+
+			}
+			else if (mode == 2)
+			{
+
+			}
 		}
 	}
 }

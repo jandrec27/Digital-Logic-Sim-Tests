@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using DLS.Description;
 using DLS.Graphics;
 using UnityEngine;
@@ -64,7 +65,12 @@ namespace DLS.Game
 			originalWireConnectionPoint = firstConnectionInfo.connectionPoint;
 			WirePoints.Add(GetAttachmentPoint(firstConnectionInfo));
 
-			if (Project.ActiveProject.ShouldRouteWires) WirePoints.Add(WirePoints[0]); // add second point to allow routing wires
+			if (Project.ActiveProject.ShouldRouteWires)
+			{
+				WirePoints.Add(WirePoints[0]); // add second point to allow routing wires
+				WirePoints.Add(WirePoints[0]); // add third point to allow routing wires
+				//WirePoints.Add(WirePoints[0]); // add fourth point to allow routing wires
+			} 
 			
 			WirePoints.Add(WirePoints[^1]); // end point to be controlled by mouse during placement mode
 
@@ -123,8 +129,9 @@ namespace DLS.Game
 			if (Project.ActiveProject.ShouldRouteWires)
 			{
 				// If routing wires, we need to reroute the second last point to account for the end pin snapping to the grid or chip pin
-				Vector2[] points = GridHelper.RouteWire(GetWirePoint(WirePoints.Count - 3), endPin.GetWorldPos(), Project.ActiveProject.WireRoutingMode);
-				SetWirePoint(points[0], WirePoints.Count - 2);
+				Vector2[] points = GridHelper.RouteWire(GetWirePoint(WirePoints.Count - 3), endPin.GetWorldPos(), Project.ActiveProject.WireRoutingMode, GetWireLength());
+				SetWirePoint(points[0], WirePoints.Count - 3);
+				SetWirePoint(points[1], WirePoints.Count - 2);
 
 			}
 
@@ -133,7 +140,7 @@ namespace DLS.Game
 				ConnectionInfo correctedFirstConnection = FirstConnectionInfo;
 			if (FirstConnectionInfo.pin.IsSourcePin == endPin.IsSourcePin) // same type, must fix
 			{
-				Debug.Assert(FirstConnectionInfo.IsConnectedAtWire, "Connection is source->source or target->target, but connection didn't start from wire?!");
+				System.Diagnostics.Debug.Assert(FirstConnectionInfo.IsConnectedAtWire, "Connection is source->source or target->target, but connection didn't start from wire?!");
 				if (endPin.IsSourcePin) correctedFirstConnection.pin = GetBusCorrectedTargetPin(FirstConnectionInfo.connectedWire);
 				else correctedFirstConnection.pin = FirstConnectionInfo.connectedWire.SourcePin;
 			}
@@ -218,27 +225,55 @@ namespace DLS.Game
 		public void SetWirePointWithSnapping(Vector2 p, int i, Vector2 straightLineRefPoint)
 		{
 			if (Project.ActiveProject.ShouldSnapToGrid) p = GridHelper.SnapToGrid(p, true, true);
-			if (Project.ActiveProject.ForceStraightWires && (!Project.ActiveProject.ShouldRouteWires || IsFullyConnected) ) p = GridHelper.ForceStraightLine(straightLineRefPoint, p);
-			if (Project.ActiveProject.ForceStraightWires && Project.ActiveProject.ShouldRouteWires && WirePoints.Count > 2 && !IsFullyConnected)
+			if (Project.ActiveProject.ForceStraightWires && (!Project.ActiveProject.ShouldRouteWires || IsFullyConnected)) p = GridHelper.ForceStraightLine(straightLineRefPoint, p);
+			if (Project.ActiveProject.ForceStraightWires && Project.ActiveProject.ShouldRouteWires /*&& WirePoints.Count > 3*/ && !IsFullyConnected)
 			{
 				// If routing wires, we need to route the wire to the new point
-				Vector2[] points = GridHelper.RouteWire(GetWirePoint(WirePoints.Count - 3), p, Project.ActiveProject.WireRoutingMode);
-				p = points[1];
-				SetWirePoint(points[0], WirePoints.Count - 2);
+				int refPointIndex = 0;
+				if (WirePoints.Count > 4)
+				{
+					refPointIndex = WirePoints.Count - 4; // use the point before the last two points
+				}
 
+
+				Vector2[] points = GridHelper.RouteWire(GetWirePoint(refPointIndex), p, Project.ActiveProject.WireRoutingMode, GetWireLength());
+				p = points[2]; 
+				SetWirePoint(points[0], WirePoints.Count - 3);
+				SetWirePoint(points[1], WirePoints.Count - 2);
+				//SetWirePoint(points[2], WirePoints.Count - 2);
+			}
+			else if (Project.ActiveProject.ShouldRouteWires)
+			{
+				// If button to route wires is not pressed (or released), set the last two points to be the same (overlapping points can be removed later)
+				if (WirePoints.Count > 2) WirePoints[^2] = p;
+				if (WirePoints.Count > 3) WirePoints[^3] = p;
+				if (WirePoints.Count > 4) WirePoints[^4] = p;
+
+			}
+
+			SetWirePoint(p, i);
+		}
+		/*
+		public void SetWirePointWithSnapping(Vector2 p, int i, Vector2 straightLineRefPoint, ChipInteractionController.RotationTarget r)
+		{
+			if (Project.ActiveProject.ShouldSnapToGrid) p = GridHelper.SnapToGrid(p, true, true);
+			if (Project.ActiveProject.ForceStraightWires && (!Project.ActiveProject.ShouldRouteWires || IsFullyConnected)) p = GridHelper.ForceStraightLine(straightLineRefPoint, p);
+			if (Project.ActiveProject.ForceStraightWires && Project.ActiveProject.ShouldRouteWires && WirePoints.Count > 3 && !IsFullyConnected)
+			{
+				// If routing wires, we need to route the wire to the new point
+				Vector2[] points = GridHelper.RouteWire(GetWirePoint(WirePoints.Count - 4), p, Project.ActiveProject.WireRoutingMode, GetWireLength());
+				p = points[2];
+				SetWirePoint(points[0], WirePoints.Count - 3);
+				SetWirePoint(points[1], WirePoints.Count - 2);	
 			}
 			else
 			{
 				// If button to route wires is not pressed (or released), set the last two points to be the same (overlapping points can be removed later)
-				if (i == WirePoints.Count - 1 && WirePoints.Count > 2) WirePoints[WirePoints.Count - 2] = p;
+				if (WirePoints.Count > 2) WirePoints[^2] = p;
 			}
-			
 
-			
 			SetWirePoint(p, i);
-		}
-
-
+		}*/
 
 		public void SetLastWirePoint(Vector2 p)
 		{
@@ -250,6 +285,8 @@ namespace DLS.Game
 			WirePoints.Add(p);
 			if (!Project.ActiveProject.ShouldRouteWires) return;
 			WirePoints.Add(p);
+			WirePoints.Add(p);
+			//WirePoints.Add(p); // add 3 extra points to allow routing wires
 		}		
 
 		public void DeleteWirePoint(int i)
@@ -278,7 +315,7 @@ namespace DLS.Game
 		// Connection info for the end of this wire that connects to another wire
 		public ref ConnectionInfo GetWireConnectionInfo()
 		{
-			Debug.Assert(ConnectedWire != null, "No connected wire?");
+			System.Diagnostics.Debug.Assert(ConnectedWire != null, "No connected wire?");
 			return ref SourceConnectionInfo.IsConnectedAtWire ? ref SourceConnectionInfo : ref TargetConnectionInfo;
 		}
 
@@ -355,6 +392,17 @@ namespace DLS.Game
 			}
 
 			return col;
+		}
+		
+		public float GetWireLength()
+		{
+			float length = 0f;
+			for (int i = 0; i < WirePoints.Count - 1; i++)
+			{
+				length += Vector2.Distance(WirePoints[i], WirePoints[i + 1]);
+			}
+
+			return length;
 		}
 
 		public static Vector2 ClosestPointOnLineSegment(Vector2 p, Vector2 a1, Vector2 a2)

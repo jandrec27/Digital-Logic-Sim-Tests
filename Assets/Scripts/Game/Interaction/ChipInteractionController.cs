@@ -23,6 +23,7 @@ namespace DLS.Game
 		IMoveable[] Obstacles; // Obstacles are the non-selected items when a group of elements is being moved
 		public Vector2 SelectionBoxStartPos;
 		StraightLineMoveState straightLineMoveState;
+		RotationTarget wireRotationTarget = RotationTarget.Right; // Determines how wires are routed by attempting to terminate the wire in the specified direction
 		bool hasExittedMultiModeSincePlacementStart;
 
 		// ---- Wire edit state ----
@@ -113,7 +114,7 @@ namespace DLS.Game
 		}
 
 		public static bool IsSelected(IMoveable element) => element.IsSelected;
-		
+
 		public void Delete(IMoveable element)
 		{
 			DeleteElements(new List<IMoveable>(new[] { element }));
@@ -190,6 +191,17 @@ namespace DLS.Game
 			if (KeyboardShortcuts.UndoShortcutTriggered) ActiveDevChip.UndoController.TryUndo();
 			else if (KeyboardShortcuts.RedoShortcutTriggered) ActiveDevChip.UndoController.TryRedo();
 
+			if (KeyboardShortcuts.RotateShortcutTriggered)
+			{
+				if (IsCreatingWire)
+				{
+					wireRotationTarget = NextRotationTarget(wireRotationTarget);
+				}
+				else
+				{
+					wireRotationTarget = RotationTarget.Right; // Reset rotation target to right when not placing wire
+				}
+			}
 
 			if (!KeyboardShortcuts.StraightLineModeHeld) straightLineMoveState = StraightLineMoveState.None;
 
@@ -1062,5 +1074,26 @@ namespace DLS.Game
 			Horizontal,
 			Vertical
 		}
+		
+		
+		public enum RotationTarget
+		{
+			Right,
+			Down,
+			Left,
+			Up
+		}
+
+		static RotationTarget NextRotationTarget(RotationTarget current)
+		{
+            return current switch
+            {
+                RotationTarget.Right => RotationTarget.Down,
+                RotationTarget.Down => RotationTarget.Left,
+                RotationTarget.Left => RotationTarget.Up,
+                RotationTarget.Up => RotationTarget.Right,
+                _ => RotationTarget.Right,
+            };
+        }
 	}
 }

@@ -482,6 +482,8 @@ namespace DLS.Game
 		public bool ForceStraightWires => KeyboardShortcuts.StraightLineModeHeld || (description.Prefs_StraightWires == 1 && ShowGrid) || description.Prefs_StraightWires == 2;
 		public bool ShouldRouteWires => description.Prefs_WireRouting == 1 || description.Prefs_WireRouting == 2;
 
+		public float WireTerminationLength = 0.5f; //Terminate Wires at 20% of its length when routing
+
 		public int WireRoutingMode => description.Prefs_WireRouting switch
 		{
 			0 => 0, // No routing
